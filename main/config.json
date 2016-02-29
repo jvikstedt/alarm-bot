@@ -1,0 +1,9 @@
+{
+  "testObjects":[
+    {
+      "url": "http://188.166.73.125",
+      "matchString": "Kirjautuminen",
+      "status": 200
+    }
+  ]
+}
