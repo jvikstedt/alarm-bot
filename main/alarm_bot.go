@@ -11,7 +11,11 @@ var conf = configuration.NewConfiguration("./config.json")
 
 func main() {
 	for _, c := range conf.TestObjects {
-		trackResult, _ := tracker.Perform(c.URL, c.MatchString)
-		fmt.Print(trackResult)
+		trackResult, err := tracker.Perform(c.URL, c.MatchString, c.Status)
+		if err != nil {
+			fmt.Print(err)
+		} else {
+			fmt.Print(trackResult)
+		}
 	}
 }

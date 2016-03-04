@@ -1,6 +1,7 @@
 package tracker
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -9,19 +10,24 @@ import (
 type TrackResult struct {
 	TargetURL         string
 	TargetText        string
-	StatusCode        int
-	TargetTextMatched bool
+	TargetStatusCode  int
+	ResultStatusCode  int
+	ResultTextMatched bool
 }
 
-func Perform(targetURL, targetText string) (TrackResult, error) {
-	var trackResult = TrackResult{TargetURL: targetURL, TargetText: targetText}
+func Perform(targetURL, targetText string, targetStatusCode int) (TrackResult, error) {
+	trackResult := TrackResult{targetURL, targetText, targetStatusCode, 0, false}
 
 	resp, err := http.Get(targetURL)
 	if err != nil {
 		return trackResult, err
 	}
 
-	trackResult.StatusCode = resp.StatusCode
+	trackResult.ResultStatusCode = resp.StatusCode
+
+	if trackResult.ResultStatusCode != targetStatusCode {
+		return trackResult, fmt.Errorf("StatusCodeMatchError: Looked for (%d), but found (%d)", trackResult.TargetStatusCode, trackResult.ResultStatusCode)
+	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
@@ -34,7 +40,11 @@ func Perform(targetURL, targetText string) (TrackResult, error) {
 		return trackResult, err
 	}
 
-	trackResult.TargetTextMatched = match
+	trackResult.ResultTextMatched = match
+
+	if !trackResult.ResultTextMatched {
+		return trackResult, fmt.Errorf("TextMatchError: Looked for (%s)", trackResult.TargetText)
+	}
 
 	return trackResult, nil
 }
