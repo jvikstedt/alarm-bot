@@ -25,7 +25,9 @@ func Perform(targetURL, targetText string, targetStatusCode int) (TrackResult, e
 
 	trackResult.ResultStatusCode = resp.StatusCode
 
-	if trackResult.ResultStatusCode != targetStatusCode {
+	if trackResult.TargetStatusCode == 0 {
+		// TODO Log that status comparison was skipped because it was not set
+	} else if trackResult.ResultStatusCode != targetStatusCode {
 		return trackResult, fmt.Errorf("StatusCodeMatchError: Looked for (%d), but found (%d)", trackResult.TargetStatusCode, trackResult.ResultStatusCode)
 	}
 
