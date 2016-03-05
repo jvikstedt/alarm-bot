@@ -11,8 +11,11 @@ import (
 
 var conf *configuration.Configuration
 
-func main() {
+func init() {
 	setupConf()
+}
+
+func main() {
 	for _, c := range conf.TestObjects {
 		trackResult, err := tracker.Perform(c.URL, c.MatchString, c.Status)
 		if err != nil {
