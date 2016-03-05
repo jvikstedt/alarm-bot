@@ -7,12 +7,20 @@ import (
 
 type Configuration struct {
 	TestObjects []TestObject `json:"testObjects"`
+	MailSetting Mail         `json:"mailSetting"`
 }
 
 type TestObject struct {
 	URL         string `json:"url"`
 	MatchString string `json:"matchString"`
 	Status      int    `json:"status"`
+}
+
+type Mail struct {
+	Host     string `json:"host"`
+	From     string `json:"from"`
+	Password string `json:"password"`
+	Port     string `json:"port"`
 }
 
 func NewConfiguration(filePath string) *Configuration {
