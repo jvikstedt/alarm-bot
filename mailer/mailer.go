@@ -14,10 +14,10 @@ func NewMailer(host, from, password, port string) *Mailer {
 }
 
 func (m Mailer) Send(subject, body, to string) error {
-	msg := "From: " + m.From + "\n" +
-		"To: " + to + "\n" +
-		"Subject: " + subject
+	msg := []byte("To: " + to + "\r\n" +
+		"Subject: " + subject + "\r\n" +
+		"\r\n" + body + "\r\n")
 
-	err := smtp.SendMail(m.Host+":"+m.Port, smtp.PlainAuth("", m.From, m.Password, m.Host), m.From, []string{to}, []byte(msg))
+	err := smtp.SendMail(m.Host+":"+m.Port, smtp.PlainAuth("", m.From, m.Password, m.Host), m.From, []string{to}, msg)
 	return err
 }

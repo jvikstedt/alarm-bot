@@ -23,7 +23,7 @@ func main() {
 		trackResult, err := tracker.Perform(c.URL, c.MatchString, c.Status)
 		if err != nil {
 			fmt.Print(err)
-			mail.Send("Subject", err.Error(), c.MailTo)
+			mail.Send("AlarmBot Error @ "+trackResult.TargetURL, err.Error(), c.MailTo)
 		} else {
 			fmt.Print(trackResult)
 		}
