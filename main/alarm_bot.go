@@ -6,13 +6,16 @@ import (
 	"os"
 
 	"github.com/jvikstedt/alarm-bot/configuration"
+	"github.com/jvikstedt/alarm-bot/mailer"
 	"github.com/jvikstedt/alarm-bot/tracker"
 )
 
+var mail *mailer.Mailer
 var conf *configuration.Configuration
 
 func init() {
 	setupConf()
+	setupMailer()
 }
 
 func main() {
@@ -32,4 +35,8 @@ func setupConf() {
 		confName = "./config.json"
 	}
 	conf = configuration.NewConfiguration(confName)
+}
+
+func setupMailer() {
+	mail = mailer.NewMailer(conf.MailSetting.Host, conf.MailSetting.From, conf.MailSetting.Password, conf.MailSetting.Port)
 }

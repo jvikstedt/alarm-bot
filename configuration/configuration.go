@@ -14,6 +14,7 @@ type TestObject struct {
 	URL         string `json:"url"`
 	MatchString string `json:"matchString"`
 	Status      int    `json:"status"`
+	MailTo      string `json:"mailTo"`
 }
 
 type Mail struct {
