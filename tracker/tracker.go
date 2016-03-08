@@ -1,12 +1,16 @@
 package tracker
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"regexp"
 	"time"
 )
+
+const TrackResultsPath = "./storage/track_results"
 
 type TrackResult struct {
 	TargetURL         string
@@ -17,8 +21,41 @@ type TrackResult struct {
 	Timestamp         time.Time
 }
 
-func Perform(targetURL, targetText string, targetStatusCode int) (TrackResult, error) {
+type Tracker struct {
+	Name         string
+	SaveCount    int
+	TrackResults []TrackResult
+}
+
+func NewTracker(name string, saveCount int) *Tracker {
+	trackResults := loadHistory(name)
+	return &Tracker{name, saveCount, trackResults}
+}
+
+func init() {
+	if _, err := os.Stat(TrackResultsPath); os.IsNotExist(err) {
+		os.MkdirAll(TrackResultsPath, 0777)
+	}
+}
+
+func (t *Tracker) SaveHistory() {
+	firstIndex := len(t.TrackResults) - t.SaveCount
+	if firstIndex < 0 {
+		firstIndex = 0
+	}
+	b, err := json.Marshal(t.TrackResults[firstIndex:])
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = ioutil.WriteFile(TrackResultsPath+"/"+t.Name+".json", b, 0777)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func (t *Tracker) Perform(targetURL, targetText string, targetStatusCode int) (TrackResult, error) {
 	trackResult := TrackResult{targetURL, targetText, targetStatusCode, 0, false, time.Now()}
+	t.TrackResults = append(t.TrackResults, trackResult)
 
 	resp, err := http.Get(targetURL)
 	if err != nil {
@@ -51,4 +88,18 @@ func Perform(targetURL, targetText string, targetStatusCode int) (TrackResult, e
 	}
 
 	return trackResult, nil
+}
+
+func loadHistory(name string) []TrackResult {
+	var trackResults []TrackResult
+	file, err := ioutil.ReadFile(TrackResultsPath + "/" + name + ".json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = json.Unmarshal(file, &trackResults)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return trackResults
 }

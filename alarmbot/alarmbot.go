@@ -19,15 +19,19 @@ func init() {
 }
 
 func main() {
+	fmt.Println("Starting AlarmBot")
 	for _, c := range conf.TestObjects {
-		trackResult, err := tracker.Perform(c.URL, c.MatchString, c.Status)
+		t := tracker.NewTracker(c.Name, c.HistoryCount)
+		trackResult, err := t.Perform(c.URL, c.MatchString, c.Status)
 		if err != nil {
 			fmt.Println(err)
 			mail.Send("AlarmBot Error @ "+trackResult.TargetURL, err.Error(), c.MailTo)
 		} else {
 			fmt.Println(trackResult)
 		}
+		t.SaveHistory()
 	}
+	fmt.Println("Closing AlarmBot")
 }
 
 func setupConf() {

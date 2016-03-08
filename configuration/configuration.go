@@ -11,10 +11,12 @@ type Configuration struct {
 }
 
 type TestObject struct {
-	URL         string `json:"url"`
-	MatchString string `json:"matchString"`
-	Status      int    `json:"status"`
-	MailTo      string `json:"mailTo"`
+	Name         string `json:"name"`
+	HistoryCount int    `json:"historyCount"`
+	URL          string `json:"url"`
+	MatchString  string `json:"matchString"`
+	Status       int    `json:"status"`
+	MailTo       string `json:"mailTo"`
 }
 
 type Mail struct {
