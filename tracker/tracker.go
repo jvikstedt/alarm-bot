@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const TrackResultsPath = "./storage/track_results"
+const TrackResultsPath = "../storage/track_results"
 
 type TrackResult struct {
 	TargetURL         string
