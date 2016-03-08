@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"time"
 )
 
 type TrackResult struct {
@@ -13,10 +14,11 @@ type TrackResult struct {
 	TargetStatusCode  int
 	ResultStatusCode  int
 	ResultTextMatched bool
+	Timestamp         time.Time
 }
 
 func Perform(targetURL, targetText string, targetStatusCode int) (TrackResult, error) {
-	trackResult := TrackResult{targetURL, targetText, targetStatusCode, 0, false}
+	trackResult := TrackResult{targetURL, targetText, targetStatusCode, 0, false, time.Now()}
 
 	resp, err := http.Get(targetURL)
 	if err != nil {
