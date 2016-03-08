@@ -22,10 +22,10 @@ func main() {
 	for _, c := range conf.TestObjects {
 		trackResult, err := tracker.Perform(c.URL, c.MatchString, c.Status)
 		if err != nil {
-			fmt.Print(err)
+			fmt.Println(err)
 			mail.Send("AlarmBot Error @ "+trackResult.TargetURL, err.Error(), c.MailTo)
 		} else {
-			fmt.Print(trackResult)
+			fmt.Println(trackResult)
 		}
 	}
 }
