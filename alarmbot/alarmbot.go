@@ -37,7 +37,7 @@ func main() {
 func setupConf() {
 	confName := os.Getenv("ALARM_BOT_CONFIG")
 	if confName == "" {
-		confName = "./config.json"
+		confName = "../config.json"
 	}
 	conf = configuration.NewConfiguration(confName)
 }
