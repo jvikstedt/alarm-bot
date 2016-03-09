@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"time"
 )
 
@@ -19,6 +20,8 @@ type TrackResult struct {
 	ResultStatusCode  int
 	ResultTextMatched bool
 	Timestamp         time.Time
+	Changed           bool
+	ChangeInfo        []string
 }
 
 type Tracker struct {
@@ -53,13 +56,13 @@ func (t *Tracker) SaveHistory() {
 	}
 }
 
-func (t *Tracker) Perform(targetURL, targetText string, targetStatusCode int) (TrackResult, error) {
-	t.TrackResults = append(t.TrackResults, TrackResult{targetURL, targetText, targetStatusCode, 0, false, time.Now()})
+func (t *Tracker) Perform(targetURL, targetText string, targetStatusCode int) (*TrackResult, error) {
+	t.TrackResults = append(t.TrackResults, TrackResult{targetURL, targetText, targetStatusCode, 0, false, time.Now(), false, []string{}})
 	trackResult := &(t.TrackResults[len(t.TrackResults)-1])
 
 	resp, err := http.Get(targetURL)
 	if err != nil {
-		return *trackResult, err
+		return trackResult, err
 	}
 
 	trackResult.ResultStatusCode = resp.StatusCode
@@ -67,27 +70,46 @@ func (t *Tracker) Perform(targetURL, targetText string, targetStatusCode int) (T
 	if trackResult.TargetStatusCode == 0 {
 		// TODO Log that status comparison was skipped because it was not set
 	} else if trackResult.ResultStatusCode != targetStatusCode {
-		return *trackResult, fmt.Errorf("StatusCodeMatchError: Looked for (%d), but found (%d)", trackResult.TargetStatusCode, trackResult.ResultStatusCode)
+		return trackResult, fmt.Errorf("StatusCodeMatchError: Looked for (%d), but found (%d)", trackResult.TargetStatusCode, trackResult.ResultStatusCode)
 	}
 
 	defer resp.Body.Close()
+	defer t.CompareTwo()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return *trackResult, err
+		return trackResult, err
 	}
 
 	match, err := regexp.MatchString(targetText, string(body))
 	if err != nil {
-		return *trackResult, err
+		return trackResult, err
 	}
 
 	trackResult.ResultTextMatched = match
 
 	if !trackResult.ResultTextMatched {
-		return *trackResult, fmt.Errorf("TextMatchError: Looked for (%s)", trackResult.TargetText)
+		return trackResult, fmt.Errorf("TextMatchError: Looked for (%s)", trackResult.TargetText)
 	}
 
-	return *trackResult, nil
+	return trackResult, nil
+}
+
+func (t *Tracker) CompareTwo() {
+	if len(t.TrackResults)-2 >= 0 {
+		first := &t.TrackResults[len(t.TrackResults)-2]
+		second := &t.TrackResults[len(t.TrackResults)-1]
+
+		if first.ResultStatusCode != second.ResultStatusCode {
+			second.Changed = true
+			second.ChangeInfo = append(second.ChangeInfo, "From: "+string(first.ResultStatusCode)+" To: "+string(second.ResultStatusCode))
+		}
+
+		if first.ResultTextMatched != second.ResultTextMatched {
+			second.Changed = true
+			second.ChangeInfo = append(second.ChangeInfo, "From: "+strconv.FormatBool(first.ResultTextMatched)+" To: "+strconv.FormatBool(second.ResultTextMatched))
+		}
+	}
 }
 
 func loadHistory(name string) []TrackResult {

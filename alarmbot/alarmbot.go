@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"os"
 
@@ -24,9 +25,14 @@ func main() {
 		t := tracker.NewTracker(c.Name, c.HistoryCount)
 		trackResult, err := t.Perform(c.URL, c.MatchString, c.Status)
 		if err != nil {
-			fmt.Println(err)
-			mail.Send("AlarmBot Error @ "+trackResult.TargetURL, err.Error(), c.MailTo)
+			if trackResult.Changed || len(t.TrackResults) <= 1 {
+				fmt.Println(err)
+				mail.Send("AlarmBot Error @ "+trackResult.TargetURL, err.Error(), c.MailTo)
+			}
 		} else {
+			if trackResult.Changed {
+				mail.Send("AlarmBot back to normal @ "+trackResult.TargetURL, strings.Join(trackResult.ChangeInfo, ","), c.MailTo)
+			}
 			fmt.Println(trackResult)
 		}
 		t.SaveHistory()
