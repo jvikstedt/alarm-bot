@@ -102,7 +102,7 @@ func (t *Tracker) CompareTwo() {
 
 		if first.ResultStatusCode != second.ResultStatusCode {
 			second.Changed = true
-			second.ChangeInfo = append(second.ChangeInfo, "From: "+string(first.ResultStatusCode)+" To: "+string(second.ResultStatusCode))
+			second.ChangeInfo = append(second.ChangeInfo, "From: "+strconv.Itoa(first.ResultStatusCode)+" To: "+strconv.Itoa(second.ResultStatusCode))
 		}
 
 		if first.ResultTextMatched != second.ResultTextMatched {
