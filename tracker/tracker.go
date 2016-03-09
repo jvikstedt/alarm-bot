@@ -61,6 +61,7 @@ func (t *Tracker) Perform(targetURL, targetText string, targetStatusCode int) (*
 	trackResult := &(t.TrackResults[len(t.TrackResults)-1])
 
 	resp, err := http.Get(targetURL)
+	defer t.CompareTwo()
 	if err != nil {
 		return trackResult, err
 	}
@@ -74,7 +75,6 @@ func (t *Tracker) Perform(targetURL, targetText string, targetStatusCode int) (*
 	}
 
 	defer resp.Body.Close()
-	defer t.CompareTwo()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
